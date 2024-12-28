@@ -20,6 +20,11 @@ function Main() {
     const Page = queryParameters.get("page")
     const [currentPage, setCurrentPage] = useState(Page ? parseInt(Page) : 1)
     const [totalPages, settotalPages] = useState(0)
+    let config = {
+        headers: new Headers({
+            "ngrok-skip-browser-warning": "69420",
+        }),
+    }
 
     async function get_updated_komik(page){
         setLoadingUpdateComponent(true)
@@ -38,9 +43,10 @@ function Main() {
             default:
                 break;
         }
-        await axios.get(url)
+    
+        await axios.get(url, config)
         .then(response => {
-
+            
             settotalPages(parseInt(response.data['pagination']))
             setKomikUpdate(response.data['data'])
             setLoadingUpdateComponent(false)
@@ -83,10 +89,15 @@ function Main() {
 
         document.getElementById('komik-rekomendasi').style = 'display: block;'
         setLoadingSimilarity(true)
-        await axios.get(`${globalData.api}/reckomik`, {params: RequestData})
+        await axios.get(`${globalData.api}/reckomik`, {params: RequestData, ...config})
         .then(response => {
+            
             const ContentFilterBase = JSON.parse(response.data['CONTENT-BASED-FILTERING'])
             const MOORA = JSON.parse(response.data['MOORA'])
+
+            console.log(ContentFilterBase);
+            console.log(MOORA);
+            
             setKomikMOORA(MOORA)
             // const komikSearchData = ContentFilterBase.filter(item => item.title === jsonData['title']);
             setKomikSearch([ContentFilterBase[0]])
@@ -102,7 +113,7 @@ function Main() {
     }
 
     async function pagination_komik(newPage) {
-        setCurrentPage(newPage)
+        setCurrentPage(newPage) 
         get_updated_komik(newPage)
 
         console.log(newPage);
